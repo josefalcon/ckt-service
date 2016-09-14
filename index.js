@@ -12,7 +12,7 @@ var gcloud = require('google-cloud')({
 });
 
 var gcs = gcloud.storage();
-var cktBucket = gcs.bucket('ckt');
+var bucket = gcs.bucket('ckt');
 
 app.post('/aac', (req, res) => {
   debug('POST /acc');
