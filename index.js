@@ -2,8 +2,10 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var debug = require('debug')('index');
 var uuid = require('uuid');
+var cors = require('cors');
 
 var app = express();
+app.use(cors());
 app.use(bodyParser.json());
 
 var projectId = process.env.GCLOUD_PROJECT;
