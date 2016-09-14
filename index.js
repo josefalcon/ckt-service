@@ -36,7 +36,7 @@ app.get('/aac/:id', (req, res) => {
 
   debug('GET /aac', id);
   res.set('Content-Type', 'application/json');
-  res.send(bucket.file(id).createReadStream());
+  bucket.file(id).createReadStream().pipe(res);
 });
 
 var port = process.env.PORT || 3000;
