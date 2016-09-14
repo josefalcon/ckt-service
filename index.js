@@ -29,14 +29,24 @@ app.post('/aac', (req, res) => {
 });
 
 app.get('/aac/:id', (req, res) => {
-  var id = req.query.id;
+  var id = req.params.id;
   if (!id) {
-    return res.status(404);
+    return res.status(404).end();
   }
 
   debug('GET /aac', id);
-  res.set('Content-Type', 'application/json');
-  bucket.file(id).createReadStream().pipe(res);
+  var file = bucket.file(id);
+  file.getMetadata((err, metadata) => {
+    if (err) {
+      return res.status(500).json({ error: err });
+    }
+
+    res
+      .set('Content-Type', 'application/json')
+      .set('Content-Length', metadata.size);
+
+    file.createReadStream().pipe(res);
+  });
 });
 
 var port = process.env.PORT || 3000;
