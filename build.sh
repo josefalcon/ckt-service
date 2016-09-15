@@ -15,6 +15,8 @@ if [ "$1" = "push" ]; then
   # tag and upload to registry
   docker tag -f $IMAGE_NAME gcr.io/$PROJECT/$IMAGE_NAME
   docker tag -f $IMAGE_NAME gcr.io/$PROJECT/$IMAGE_ID:latest
+
+  echo "Pushing docker image: gcr.io/$PROJECT/$IMAGE_NAME"
   gcloud docker push gcr.io/$PROJECT/$IMAGE_NAME
   gcloud docker push gcr.io/$PROJECT/$IMAGE_ID:latest
 fi
