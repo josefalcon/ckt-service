@@ -6,7 +6,7 @@ var cors = require('cors');
 
 var app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' }));
 
 var projectId = process.env.GCLOUD_PROJECT;
 var gcloud = require('google-cloud')({
