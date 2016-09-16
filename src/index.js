@@ -3,18 +3,17 @@ var bodyParser = require('body-parser');
 var debug = require('debug')('index');
 var uuid = require('uuid');
 var cors = require('cors');
+var gcloud = require('google-cloud');
+var config = require('./utils/config');
 
 var app = express();
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 
-var projectId = process.env.GCLOUD_PROJECT;
-var gcloud = require('google-cloud')({
-  projectId: projectId
+var gcs = gcloud.storage({
+  projectId: config.get('GCLOUD_PROJECT'),
 });
-
-var gcs = gcloud.storage();
-var bucket = gcs.bucket('ckt');
+var bucket = gcs.bucket(config.get('STORAGE_BUCKET'));
 
 app.post('/aac', (req, res) => {
   debug('POST /aac');
@@ -49,7 +48,7 @@ app.get('/aac/:id', (req, res) => {
   });
 });
 
-var port = process.env.PORT || 3000;
+var port = config.get('PORT');
 process.on('SIGINT', function() {
     process.exit();
 });

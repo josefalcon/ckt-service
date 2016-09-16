@@ -6,5 +6,5 @@ WORKDIR /usr/local/ckt-service
 COPY package.json package.json
 RUN npm install
 
-COPY index.js index.js
-CMD node index.js
+COPY src src
+CMD node src/index.js
