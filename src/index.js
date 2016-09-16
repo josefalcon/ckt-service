@@ -1,10 +1,11 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var debug = require('debug')('index');
-var uuid = require('uuid');
 var cors = require('cors');
 var gcloud = require('google-cloud');
 var config = require('./utils/config');
+var images = require('./utils/images');
+var uuid = require('uuid');
 
 var app = express();
 app.use(cors());
@@ -13,19 +14,36 @@ app.use(bodyParser.json({ limit: '50mb' }));
 var gcs = gcloud.storage({
   projectId: config.get('GCLOUD_PROJECT'),
 });
-var bucket = gcs.bucket(config.get('STORAGE_BUCKET'));
+var bucket = gcs.bucket(config.get('CLOUD_BUCKET'));
 
-app.post('/aac', (req, res) => {
-  debug('POST /aac');
-  var id = uuid.v4();
-  var remoteWriteStream =
-    bucket.file(id).save(JSON.stringify(req.body), function(err) {
-      if (!err) {
-        return res.json({ id: id });
-      }
-      return res.status(500).json({ error: err });
-    });
-});
+const applicationJson = { metadata: { contentType: "application/json" } };
+
+app.post(
+  '/aac',
+  images.multer.array('image'),
+  images.sendUploadsToGCS,
+  (req, res) => {
+    debug('POST /aac');
+
+    // JF TODO: these need to be validated, assert same length, etc.
+    var files = req.files.map(file => file.cloudStoragePublicUrl);
+    var values = JSON.parse(req.body.values);
+
+    var body = { symbols: [] };
+    for (var i = 0; i < files.length; i++) {
+      body.symbols.push({ image: files[i], value: values[i] });
+    }
+
+    var id = uuid.v4();
+    var remoteWriteStream =
+      bucket.file(id).save(JSON.stringify(body), applicationJson, function(err) {
+        if (!err) {
+          return res.json({ id: id });
+        }
+        return res.status(500).json({ error: err });
+      });
+  }
+);
 
 app.get('/aac/:id', (req, res) => {
   var id = req.params.id;
