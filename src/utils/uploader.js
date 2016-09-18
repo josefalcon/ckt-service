@@ -41,11 +41,25 @@ function upload(file) {
 }
 
 function sendUploadsToGCS(req, res, next) {
-  if (!req.files || req.files.length === 0) {
+  if (!req.files) {
     return next();
   }
 
-  Promise.all(req.files.map(upload))
+  if (Array.isArray(req.files)) {
+    if (req.files.length === 0) {
+      return next();
+    }
+
+    return Promise.all(req.files.map(upload))
+      .then(() => next())
+      .catch(next);
+  }
+
+  // assume it's an object.
+  var keyUploads = Object.keys(req.files)
+    .map(key => Promise.all(req.files[key].map(upload)));
+
+  return Promise.all(keyUploads)
     .then(() => next())
     .catch(next);
 }

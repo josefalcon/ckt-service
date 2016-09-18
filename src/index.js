@@ -4,7 +4,7 @@ var debug = require('debug')('index');
 var cors = require('cors');
 var gcloud = require('google-cloud');
 var config = require('./utils/config');
-var images = require('./utils/images');
+var uploader = require('./utils/uploader');
 var uuid = require('uuid');
 
 var app = express();
@@ -20,18 +20,22 @@ const applicationJson = { metadata: { contentType: "application/json" } };
 
 app.post(
   '/aac',
-  images.multer.array('image'),
-  images.sendUploadsToGCS,
+  uploader.multer.fields([
+    { name: 'image' },
+    { name: 'audio' },
+  ]),
+  uploader.sendUploadsToGCS,
   (req, res) => {
     debug('POST /aac');
 
     // JF TODO: these need to be validated, assert same length, etc.
-    var files = req.files.map(file => file.cloudStoragePublicUrl);
+    var images = req.files.image.map(file => file.cloudStoragePublicUrl);
+    var audios = req.files.audio.map(file => file.cloudStoragePublicUrl);
     var values = JSON.parse(req.body.values);
 
     var body = { symbols: [] };
-    for (var i = 0; i < files.length; i++) {
-      body.symbols.push({ image: files[i], value: values[i] });
+    for (var i = 0; i < images.length; i++) {
+      body.symbols.push({ image: images[i], value: values[i], audio: audios[i] });
     }
 
     var id = uuid.v4();
