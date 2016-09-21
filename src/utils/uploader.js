@@ -41,8 +41,8 @@ function upload(file) {
     // JF TODO: hack this for now.
     if (file.mimetype.startsWith('image/')) {
       gm(file.buffer, file.originalname)
-        .noProfile()
         .autoOrient()
+	.noProfile()
         .resize(MAX_SIZE, MAX_SIZE, '!')
         .stream()
         .pipe(stream);
