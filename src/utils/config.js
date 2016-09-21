@@ -10,7 +10,8 @@ nconf
   ])
   .file({ file: path.join(process.cwd(), 'config.json') })
   .defaults({
-    PORT: 3000
+    PORT: 3000,
+    MAX_SIZE: 500
   });
 
 module.exports = nconf;

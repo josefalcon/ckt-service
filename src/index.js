@@ -39,13 +39,12 @@ app.post(
     }
 
     var id = uuid.v4();
-    var remoteWriteStream =
-      bucket.file(id).save(JSON.stringify(body), applicationJson, function(err) {
-        if (!err) {
-          return res.json({ id: id });
-        }
-        return res.status(500).json({ error: err });
-      });
+    bucket.file(id).save(JSON.stringify(body), applicationJson, function(err) {
+      if (!err) {
+        return res.json({ id: id });
+      }
+      return res.status(500).json({ error: err });
+    });
   }
 );
 

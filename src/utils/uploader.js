@@ -1,7 +1,9 @@
 var gcloud = require('google-cloud');
+var gm = require('gm');
 var config = require('./config');
 
 var CLOUD_BUCKET = config.get('CLOUD_BUCKET');
+var MAX_SIZE = config.get('MAX_SIZE');
 
 var storage = gcloud.storage({
   projectId: config.get('GCLOUD_PROJECT'),
@@ -36,7 +38,16 @@ function upload(file) {
       resolve();
     });
 
-    stream.end(file.buffer);
+    // JF TODO: hack this for now.
+    if (file.mimetype.startsWith('image/')) {
+      gm(file.buffer, file.originalname)
+        .noProfile()
+        .resize(MAX_SIZE, MAX_SIZE, '!')
+        .stream()
+        .pipe(stream);
+    } else {
+      stream.end(file.buffer);
+    }
   });
 }
 
