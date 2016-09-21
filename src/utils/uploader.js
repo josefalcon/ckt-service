@@ -42,6 +42,7 @@ function upload(file) {
     if (file.mimetype.startsWith('image/')) {
       gm(file.buffer, file.originalname)
         .noProfile()
+        .autoOrient()
         .resize(MAX_SIZE, MAX_SIZE, '!')
         .stream()
         .pipe(stream);
