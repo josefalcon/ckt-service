@@ -3,9 +3,11 @@ var bodyParser = require('body-parser');
 var debug = require('debug')('index');
 var cors = require('cors');
 var gcloud = require('google-cloud');
+var uuid = require('uuid');
 var config = require('./utils/config');
 var uploader = require('./utils/uploader');
-var uuid = require('uuid');
+var datastore = require('./utils/datastore');
+var unit = require('./unit-model');
 
 var app = express();
 app.use(cors());
@@ -69,11 +71,26 @@ app.get('/aac/:id', (req, res) => {
   });
 });
 
-var port = config.get('PORT');
-process.on('SIGINT', function() {
-    process.exit();
+app.get('/unit/:id', (req, res) => {
+  var id = req.params.id;
+  if (!id) {
+    return res.status(404).end();
+  }
+
+  debug('GET /unit', id);
+  unit.read(id)
+    .then((entity) => res.json(entity))
+    .catch((error) => res.status(500).json(error));
 });
 
+app.get('/unit', (req, res) => {
+  debug('GET /unit');
+  unit.list(10)
+    .then((entity) => res.json(entity))
+    .catch((error) => res.status(500).json(error));
+});
+
+var port = config.get('PORT');
 app.listen(port, function () {
   console.log('Listening on port', port);
 });
