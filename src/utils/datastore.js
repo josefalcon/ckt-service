@@ -88,10 +88,10 @@ function get (kind, id) {
 }
 
 function createAll (kind, datas, nonIndexed) {
-  var entities = datas.map(data => {
+  var entities = datas.map(data => ({
     key: key(kind),
     data: toDatastore(data, nonIndexed),
-  });
+  }));
 
   return new Promise((resolve, reject) => {
     ds.save(entities, (err) => {
@@ -99,7 +99,7 @@ function createAll (kind, datas, nonIndexed) {
         reject(err);
       }
       for (var i = 0; i < entities.length; i++) {
-        data[i].id = entities[i].key.id;
+        datas[i].id = entities[i].key.id;
       }
       resolve(datas);
     });
@@ -152,4 +152,5 @@ module.exports = {
   delete: _delete,
   createQuery: (kind) => ds.createQuery([kind]),
   runQuery: runQuery,
+  createAll: createAll,
 }

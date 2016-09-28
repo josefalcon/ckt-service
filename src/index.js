@@ -35,18 +35,17 @@ app.post(
     var audios = req.files.audio.map(file => file.cloudStoragePublicUrl);
     var values = JSON.parse(req.body.values);
 
-    var body = { symbols: [] };
+    var units = [];
     for (var i = 0; i < images.length; i++) {
-      body.symbols.push({ image: images[i], value: values[i], audio: audios[i] });
+      units.push({ image: images[i], value: values[i], audio: audios[i] });
     }
 
-    var id = uuid.v4();
-    bucket.file(id).save(JSON.stringify(body), applicationJson, function(err) {
-      if (!err) {
-        return res.json({ id: id });
-      }
-      return res.status(500).json({ error: err });
-    });
+    datastore.createAll('Unit', units, ['audio', 'image'])
+      .then((entity) => res.json(entity))
+      .catch((error) => {
+        console.log(error);
+        res.status(500).json({ error: error });
+      });
   }
 );
 
